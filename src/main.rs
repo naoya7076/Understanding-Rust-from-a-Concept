@@ -1,77 +1,30 @@
-trait CalcArea {
-    fn calc_area(&self) -> f64;
-}
+use std::fs::File;
+use std::io::Read;
 
-trait CalcLength {
-    fn calc_length(&self) -> f64;
-}
+const BUFSIZE: usize = 1024;
 
-struct Line {
-    length: f64,
-}
+fn main() -> std::io::Result<()> {
+    let mut f = File::open("hello.txt")?;
+    let mut buf = [0_u8; BUFSIZE];
 
-impl CalcLength for Line {
-    fn calc_length(&self) -> f64 {
-        self.length
+    let mut lines = Vec::new();
+    let mut linebuf = String::new();
+
+    loop {
+        let read_size = f.read(&mut buf)?;
+        if read_size == 0 {
+            break;
+        }
+
+        for cc in &buf[..read_size] {
+            if *cc == b'\n' {
+                lines.push(linebuf);
+                linebuf = String::new();
+            } else {
+                linebuf.push(*cc as char);
+            }
+        }
     }
-}
-
-impl CalcLength for Rectangle {
-    fn calc_length(&self) -> f64 {
-        2.0 * (self.width + self.height)
-    }
-}
-
-impl CalcLength for RightTriangle {
-    fn calc_length(&self) -> f64 {
-        self.base + self.height + (self.base.powi(2) + self.height.powi(2)).sqrt()
-    }
-}
-
-struct Rectangle {
-    width: f64,
-    height: f64,
-}
-
-impl CalcArea for Rectangle {
-    fn calc_area(&self) -> f64 {
-        self.width * self.height
-    }
-}
-
-struct RightTriangle {
-    base: f64,
-    height: f64,
-}
-
-impl CalcArea for RightTriangle {
-    fn calc_area(&self) -> f64 {
-        0.5 * self.base * self.height
-    }
-}
-
-fn area<T: CalcArea>(shape: &T) -> f64 {
-    shape.calc_area()
-}
-
-fn length<T: CalcLength>(shape: &T) -> f64 {
-    shape.calc_length()
-}
-
-fn main() {
-    let rectangle = Rectangle {
-        width: 3.0,
-        height: 4.0,
-    };
-    println!("Area of rectangle: {}", area(&rectangle));
-    println!("Length of rectangle: {}", length(&rectangle));
-    let triangle = RightTriangle {
-        base: 3.0,
-        height: 4.0,
-    };
-    println!("Area of triangle: {}", area(&triangle));
-    println!("Length of triangle: {}", length(&triangle));
-
-    let line = Line { length: 5.0 };
-    println!("Length of line: {}", length(&line));
+    println!("{:?}", lines);
+    Ok(())
 }
