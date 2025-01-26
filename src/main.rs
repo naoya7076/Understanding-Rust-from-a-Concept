@@ -1,24 +1,17 @@
-use std::sync::{Arc, Mutex};
-use std::thread::spawn;
+use std::{sync::mpsc::channel, thread::spawn};
 
 fn main() {
-    let data = Arc::new(Mutex::new(Vec::new()));
+    let data = vec![1, 2, 3, 4, 5];
+    let (tx, rx) = channel::<i32>();
 
-    let added = vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    let data_len = data.len();
 
-    let mut thread = Vec::new();
-    for a in added {
-        let data = Arc::clone(&data);
-        let th = spawn(move || {
-            let mut data = data.lock().unwrap();
-            data.push(a);
-        });
-        thread.push(th);
+    for d in data {
+        let tx = tx.clone();
+        spawn(move || tx.send(d));
     }
-    thread.into_iter().for_each(|th| {
-        let _ = th.join();
-    });
 
-    let x = data.lock().unwrap();
-    println!("{:?}", x);
+    for _ in 0..data_len {
+        println!("{}", rx.recv().unwrap());
+    }
 }
