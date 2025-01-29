@@ -1,10 +1,16 @@
-async fn sum_func(n: usize) -> usize {
-    let ans = (1..=n).sum::<usize>();
-    println!("sum: {}", ans);
-    ans
+fn do_it(f: fn(u64, u64) -> u64, a: u64, b: u64) {
+    println!("Result: {}", f(a, b));
 }
-#[tokio::main]
-async fn main() {
-    sum_func(10000000).await;
-    sum_func(20000000).await;
+
+fn add(a: u64, b: u64) -> u64 {
+    a + b
+}
+
+fn multiply(a: u64, b: u64) -> u64 {
+    a * b
+}
+
+fn main() {
+    do_it(add, 1, 2);
+    do_it(multiply, 3, 4);
 }
